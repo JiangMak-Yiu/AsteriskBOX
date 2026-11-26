@@ -39,7 +39,7 @@ jobs:
       RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
       RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
       RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
-      SEND_TO_TELEGRAM: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.send_to_telegram == 'true' }}
+      SEND_TO_TELEGRAM: ${{ (github.event_name != 'workflow_dispatch' || github.event.inputs.send_to_telegram == 'true') && secrets.TELEGRAM_BOT_TOKEN != '' }}
       REQUESTED_VERSION_NAME: ${{ github.event.inputs.version_name }}
 
     steps:
