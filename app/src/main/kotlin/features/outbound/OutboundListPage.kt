@@ -1123,8 +1123,8 @@ private fun OutboundCard(
                         text = outbound.remarks.ifBlank { outbound.type },
                         style = if (compact) {
                             MaterialTheme.typography.titleSmall.copy(
-                                fontSize = 13.sp,
-                                lineHeight = 17.sp,
+                                fontSize = 12.sp,
+                                lineHeight = 15.sp,
                             )
                         } else {
                             MaterialTheme.typography.titleMedium
@@ -1632,9 +1632,9 @@ private val OutboundGridSpacing = OutboundGridSpacingDp.dp
 private val OutboundCardHeight = OutboundCardHeightDp.dp
 
 // Compact (multi-column) cards fit a two-line title; the title row is held at the 48dp menu touch target.
-private val OutboundCompactCardHeight = 100.dp
+private val OutboundCompactCardHeight = 94.dp
 private val OutboundCardPadding =
-    PaddingValues(start = 10.dp, top = 14.dp, end = 10.dp, bottom = 10.dp)
+    PaddingValues(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 8.dp)
 private val OutboundCardMenuIconOffset = outboundCardMenuIconOffsetDp(
     touchTargetDp = 48,
     iconSizeDp = 24,
