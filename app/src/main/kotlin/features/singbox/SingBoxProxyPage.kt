@@ -1315,8 +1315,8 @@ private fun SingBoxProxyNodeCard(
         ) {
             val titleStyle = if (compact) {
                 MaterialTheme.typography.titleSmall.copy(
-                    fontSize = 13.sp,
-                    lineHeight = 17.sp,
+                    fontSize = 12.sp,
+                    lineHeight = 15.sp,
                 )
             } else {
                 MaterialTheme.typography.titleMedium
@@ -1630,17 +1630,17 @@ private fun delayColor(
     }
 }
 
-private val SingBoxProxyNodeCardHeight = 112.dp
+private val SingBoxProxyNodeCardHeight = 96.dp
 
-// Compact (multi-column) cards fit a two-line title, a 2dp gap and the 28dp protocol/delay line.
-private val SingBoxProxyNodeCompactCardHeight = 90.dp
-private val SingBoxProxyNodeCardTopPadding = 14.dp
+// Compact (multi-column) cards fit a two-line title, a 2dp gap and the 24dp protocol/delay line.
+private val SingBoxProxyNodeCompactCardHeight = 76.dp
+private val SingBoxProxyNodeCardTopPadding = 10.dp
 private val SingBoxProxyNodeCardHorizontalPadding = 10.dp
 private val SingBoxProxyNodeCardPadding = PaddingValues(
     start = SingBoxProxyNodeCardHorizontalPadding,
     top = SingBoxProxyNodeCardTopPadding,
     end = SingBoxProxyNodeCardHorizontalPadding,
-    bottom = 10.dp,
+    bottom = 8.dp,
 )
 private val SingBoxProxyNodeSelectedIconSize = 20.dp
 
@@ -1649,5 +1649,5 @@ private val SingBoxProxyNodeSelectedIconSize = 20.dp
 private fun singBoxProxyNodeSelectedIconEndInset(titleLineHeight: Dp): Dp =
     (SingBoxProxyNodeCardTopPadding - SingBoxProxyNodeCardHorizontalPadding +
         (titleLineHeight - SingBoxProxyNodeSelectedIconSize) / 2).coerceAtLeast(0.dp)
-private val SingBoxProxyNodeGridSpacing = 12.dp
+private val SingBoxProxyNodeGridSpacing = 8.dp
 private val SingBoxFloatingToolbarBottomSpacing = 16.dp
