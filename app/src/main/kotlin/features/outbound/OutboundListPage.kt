@@ -40,6 +40,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import ui.components.AsteriskScaffold
@@ -49,6 +50,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -1145,6 +1147,7 @@ private fun OutboundCard(
                     }
                 }
                 OutboundCardMenu(
+                    compact = compact,
                     onInteractionCountChange = onInteractionCountChange,
                     pingEnabled = item.pingHost != null && !pinging,
                     shareUrlResult = shareUrlResult,
@@ -1155,7 +1158,10 @@ private fun OutboundCard(
                 )
             }
             Row(
-                modifier = Modifier.fillMaxWidth().height(28.dp).padding(end = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(if (compact) 24.dp else 28.dp)
+                    .padding(end = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
@@ -1179,6 +1185,7 @@ private fun OutboundCard(
 
 @Composable
 private fun OutboundCardMenu(
+    compact: Boolean,
     pingEnabled: Boolean,
     shareUrlResult: OutboundShareUrlResult,
     onEdit: () -> Unit,
@@ -1197,17 +1204,27 @@ private fun OutboundCardMenu(
     val menuSpatialMotion = AsteriskMotion.fastSpatial<IntOffset>()
     val menuSizeMotion = AsteriskMotion.fastSpatial<IntSize>()
     val menuEffectsMotion = AsteriskMotion.fastEffects<Float>()
+    val menuOffset = if (compact) OutboundCompactCardMenuIconOffset else OutboundCardMenuIconOffset
     Box(
         modifier = Modifier.offset(
-            x = OutboundCardMenuIconOffset.x.dp,
-            y = OutboundCardMenuIconOffset.y.dp,
+            x = menuOffset.x.dp,
+            y = menuOffset.y.dp,
         ),
     ) {
-        IconButton(onClick = { menuExpanded = true }) {
-            Icon(
-                imageVector = Icons.Rounded.MoreVert,
-                contentDescription = stringResource(R.string.common_more),
-            )
+        // The compact card has no room for a 48dp touch target; keep the icon aligned to the
+        // card's content edge with a 32dp button instead of overflowing the 76dp card.
+        CompositionLocalProvider(
+            LocalMinimumInteractiveComponentSize provides if (compact) 0.dp else 48.dp,
+        ) {
+            IconButton(
+                onClick = { menuExpanded = true },
+                modifier = if (compact) Modifier.size(32.dp) else Modifier,
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.MoreVert,
+                    contentDescription = stringResource(R.string.common_more),
+                )
+            }
         }
         DropdownMenu(
             expanded = menuExpanded,
@@ -1631,12 +1648,17 @@ private val OutboundCardMenuWidth = 224.dp
 private val OutboundGridSpacing = OutboundGridSpacingDp.dp
 private val OutboundCardHeight = OutboundCardHeightDp.dp
 
-// Compact (multi-column) cards fit a two-line title; the title row is held at the 48dp menu touch target.
-private val OutboundCompactCardHeight = 94.dp
+// Compact (multi-column) cards mirror the running proxy node card: two-line title,
+// a 24dp protocol/delay line and a 32dp menu button inside the same 76dp height.
+private val OutboundCompactCardHeight = 76.dp
 private val OutboundCardPadding =
     PaddingValues(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 8.dp)
 private val OutboundCardMenuIconOffset = outboundCardMenuIconOffsetDp(
     touchTargetDp = 48,
+    iconSizeDp = 24,
+)
+private val OutboundCompactCardMenuIconOffset = outboundCardMenuIconOffsetDp(
+    touchTargetDp = 32,
     iconSizeDp = 24,
 )
 private val OutboundEmptyStateMinHeight = 320.dp
