@@ -255,7 +255,7 @@ fun SingBoxDashboardPage(
     AsteriskScaffold(
         topBar = {
             AsteriskTopAppBar(
-                title = { Text(stringResource(R.string.app_name)) },
+                title = { Text("${stringResource(R.string.app_name)} Pro") },
             )
         },
     ) { innerPadding ->
