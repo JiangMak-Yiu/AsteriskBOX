@@ -353,6 +353,7 @@
     <string name="sing_box_proxies_option_layout_auto">自动</string>
     <string name="sing_box_proxies_option_layout_double">双列</string>
     <string name="sing_box_proxies_option_layout_multiple">多列</string>
+    <string name="sing_box_proxies_option_layout_ultracompact">极致紧凑</string>
     <string name="sing_box_proxies_option_layout_single">单列</string>
     <string name="sing_box_proxies_option_sort">代理排序</string>
     <string name="sing_box_proxies_option_sort_delay">延迟</string>
@@ -505,6 +506,7 @@
     <string name="outbound_option_layout_auto">自动</string>
     <string name="outbound_option_layout_double">双列</string>
     <string name="outbound_option_layout_multiple">多列</string>
+    <string name="outbound_option_layout_ultracompact">极致紧凑</string>
     <string name="outbound_option_layout_single">单列</string>
     <string name="outbound_options">出站选项</string>
     <string name="outbound_ping">PING</string>

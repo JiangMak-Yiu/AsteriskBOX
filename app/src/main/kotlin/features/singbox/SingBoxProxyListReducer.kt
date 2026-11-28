@@ -8,6 +8,7 @@ import app.modes.SingBoxProxyLayoutDouble
 import app.AppState
 import app.modes.SingBoxProxyLayoutMultiple
 import app.modes.SingBoxProxyLayoutSingle
+import app.modes.SingBoxProxyLayoutUltraCompact
 import app.modes.SingBoxProxySortDefault
 import app.modes.SingBoxProxySortDelay
 import app.modes.SingBoxProxySortName
@@ -159,7 +160,8 @@ internal fun reduceSingBoxProxyGroupSections(
 
 internal fun resolveSingBoxProxyLayout(layout: Int, isWideScreen: Boolean): Int {
     return when (layout) {
-        SingBoxProxyLayoutSingle, SingBoxProxyLayoutDouble, SingBoxProxyLayoutMultiple -> layout
+        SingBoxProxyLayoutSingle, SingBoxProxyLayoutDouble, SingBoxProxyLayoutMultiple,
+        SingBoxProxyLayoutUltraCompact -> layout
         SingBoxProxyLayoutAuto -> if (isWideScreen) SingBoxProxyLayoutMultiple else SingBoxProxyLayoutDouble
         else -> if (isWideScreen) SingBoxProxyLayoutMultiple else SingBoxProxyLayoutDouble
     }
@@ -168,7 +170,7 @@ internal fun resolveSingBoxProxyLayout(layout: Int, isWideScreen: Boolean): Int 
 internal fun resolveSingBoxProxyColumns(layout: Int): Int {
     return when (layout) {
         SingBoxProxyLayoutSingle -> 1
-        SingBoxProxyLayoutMultiple -> 3
+        SingBoxProxyLayoutMultiple, SingBoxProxyLayoutUltraCompact -> 3
         else -> 2
     }
 }

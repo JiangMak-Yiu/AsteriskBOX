@@ -360,6 +360,7 @@
     <string name="sing_box_proxies_option_layout_auto">Automatic</string>
     <string name="sing_box_proxies_option_layout_double">Double</string>
     <string name="sing_box_proxies_option_layout_multiple">Multiple</string>
+    <string name="sing_box_proxies_option_layout_ultracompact">Ultra compact</string>
     <string name="sing_box_proxies_option_layout_single">Single</string>
     <string name="sing_box_proxies_option_sort">Proxy sorting</string>
     <string name="sing_box_proxies_option_sort_delay">Delay</string>
@@ -517,6 +518,7 @@
     <string name="outbound_option_layout_auto">Automatic</string>
     <string name="outbound_option_layout_double">Double</string>
     <string name="outbound_option_layout_multiple">Multiple</string>
+    <string name="outbound_option_layout_ultracompact">Ultra compact</string>
     <string name="outbound_option_layout_single">Single</string>
     <string name="outbound_options">Outbound options</string>
     <string name="outbound_ping">PING</string>

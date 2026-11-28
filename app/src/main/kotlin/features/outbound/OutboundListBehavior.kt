@@ -8,6 +8,7 @@ import app.modes.OutboundListLayoutAuto
 import app.modes.OutboundListLayoutDouble
 import app.modes.OutboundListLayoutMultiple
 import app.modes.OutboundListLayoutSingle
+import app.modes.OutboundListLayoutUltraCompact
 import engine.singbox.config.SingBoxJson
 import features.importing.ImportOutcome
 import features.subscription.runtime.fetchMihomoProvider
@@ -18,6 +19,7 @@ import kotlinx.serialization.json.contentOrNull
 internal const val OutboundListBaseBottomExtraDp = 12
 internal const val OutboundGridSpacingDp = 8
 internal const val OutboundCardHeightDp = 76
+internal const val OutboundUltraCompactCardHeightDp = 56
 
 internal data class OutboundCardMenuIconOffsetDp(
     val x: Int,
@@ -43,6 +45,7 @@ internal fun resolveOutboundListColumns(
     OutboundListLayoutSingle -> 1
     OutboundListLayoutDouble -> 2
     OutboundListLayoutMultiple -> 3
+    OutboundListLayoutUltraCompact -> 3
     OutboundListLayoutAuto -> if (isWideScreen) 3 else 2
     else -> if (isWideScreen) 3 else 2
 }

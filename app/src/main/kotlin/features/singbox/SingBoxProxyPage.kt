@@ -97,6 +97,7 @@ import app.modes.SingBoxProxyLayoutAuto
 import app.modes.SingBoxProxyLayoutDouble
 import app.modes.SingBoxProxyLayoutMultiple
 import app.modes.SingBoxProxyLayoutSingle
+import app.modes.SingBoxProxyLayoutUltraCompact
 import app.modes.SingBoxProxySortDefault
 import app.modes.SingBoxProxySortDelay
 import app.modes.SingBoxProxySortName
@@ -625,6 +626,7 @@ fun SingBoxProxyPage(
                                             selectionEnabled = selectionBehavior.cardEnabled,
                                             delayTestEnabled = runtimeAvailable,
                                             compact = columns > 1,
+                                            ultraCompact = proxyLayout == SingBoxProxyLayoutUltraCompact,
                                             delayStatus = resolveSingBoxProxyDelayStatus(
                                                 nodeName = node.name,
                                                 delay = node.delay,
@@ -757,6 +759,7 @@ fun SingBoxProxyPage(
                                             selectionEnabled = selectionBehavior.cardEnabled,
                                             delayTestEnabled = runtimeAvailable,
                                             compact = columns > 1,
+                                            ultraCompact = proxyLayout == SingBoxProxyLayoutUltraCompact,
                                             delayStatus = resolveSingBoxProxyDelayStatus(
                                                 nodeName = node.name,
                                                 delay = node.delay,
@@ -1089,6 +1092,7 @@ private fun SingBoxProxyOptionsMenu(
             SingBoxProxyLayoutSingle -> R.string.sing_box_proxies_option_layout_single
             SingBoxProxyLayoutDouble -> R.string.sing_box_proxies_option_layout_double
             SingBoxProxyLayoutMultiple -> R.string.sing_box_proxies_option_layout_multiple
+            SingBoxProxyLayoutUltraCompact -> R.string.sing_box_proxies_option_layout_ultracompact
             else -> R.string.sing_box_proxies_option_layout_auto
         },
     )
@@ -1231,6 +1235,11 @@ private fun SingBoxProxyOptionsMenu(
                             R.string.sing_box_proxies_option_layout_multiple,
                             Icons.Rounded.GridView,
                         ),
+                        Triple(
+                            SingBoxProxyLayoutUltraCompact,
+                            R.string.sing_box_proxies_option_layout_ultracompact,
+                            Icons.Rounded.ViewAgenda,
+                        ),
                     ).forEach { (value, label, _) ->
                         AsteriskDropdownMenuItem(
                             text = stringResource(label),
@@ -1302,6 +1311,7 @@ private fun SingBoxProxyNodeCard(
     selectionEnabled: Boolean,
     delayTestEnabled: Boolean,
     compact: Boolean,
+    ultraCompact: Boolean,
     delayStatus: SingBoxProxyDelayStatus,
     testing: Boolean,
     onSelect: (() -> Unit)?,
@@ -1310,7 +1320,9 @@ private fun SingBoxProxyNodeCard(
 ) {
     val content: @Composable () -> Unit = {
         Column(
-            modifier = Modifier.fillMaxSize().padding(SingBoxProxyNodeCardPadding),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(if (ultraCompact) SingBoxProxyNodeUltraCompactCardPadding else SingBoxProxyNodeCardPadding),
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
             val titleStyle = if (compact) {
@@ -1332,7 +1344,7 @@ private fun SingBoxProxyNodeCard(
                     style = titleStyle,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2,
+                    maxLines = if (ultraCompact) 1 else 2,
                     overflow = TextOverflow.Ellipsis,
                 )
                 if (selected) {
@@ -1361,12 +1373,19 @@ private fun SingBoxProxyNodeCard(
                 testing = testing,
                 enabled = delayTestEnabled,
                 compact = compact,
+                ultraCompact = ultraCompact,
                 onClick = onDelayTest,
             )
         }
     }
     val cardModifier = modifier
-        .height(if (compact) SingBoxProxyNodeCompactCardHeight else SingBoxProxyNodeCardHeight)
+        .height(
+            when {
+                ultraCompact -> SingBoxProxyNodeUltraCompactCardHeight
+                compact -> SingBoxProxyNodeCompactCardHeight
+                else -> SingBoxProxyNodeCardHeight
+            }
+        )
         .semantics { this.selected = selected }
     AsteriskSelectionCard(
         selected = selected,
@@ -1387,6 +1406,7 @@ private fun ProtocolDelayLine(
     testing: Boolean,
     enabled: Boolean,
     compact: Boolean,
+    ultraCompact: Boolean,
     onClick: () -> Unit,
 ) {
     val delayText = when (delayStatus) {
@@ -1406,11 +1426,16 @@ private fun ProtocolDelayLine(
             override val minimumTouchTargetSize = DpSize(24.dp, 24.dp)
         }
     }
+    val denseTextStyle = when {
+        ultraCompact -> MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, lineHeight = 12.sp)
+        compact -> MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, lineHeight = 14.sp)
+        else -> null
+    }
     CompositionLocalProvider(LocalViewConfiguration provides chipTouchTargetViewConfiguration) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(24.dp)
+                .height(if (ultraCompact) 18.dp else 24.dp)
                 .clip(ui.theme.AsteriskShapeTokens.Pill)
                 .clickable(enabled = enabled, onClick = { if (!testing) onClick() }),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -1420,35 +1445,21 @@ private fun ProtocolDelayLine(
                 text = protocol.displaySingBoxProtocolName(compact = compact),
                 modifier = Modifier.weight(1f, fill = false),
                 emphasized = selected,
-                textStyle = if (compact) {
-                    MaterialTheme.typography.labelSmall.copy(
-                        fontSize = 10.sp,
-                        lineHeight = 14.sp,
-                    )
-                } else {
-                    MaterialTheme.typography.labelSmall
-                },
+                textStyle = denseTextStyle ?: MaterialTheme.typography.labelSmall,
             )
             Box(
-                modifier = Modifier.padding(end = 8.dp).height(24.dp),
+                modifier = Modifier.padding(end = 8.dp).height(if (ultraCompact) 18.dp else 24.dp),
                 contentAlignment = Alignment.CenterEnd,
             ) {
                 if (testing) {
                     CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier.size(if (ultraCompact) 14.dp else 20.dp),
                         strokeWidth = 2.5.dp,
                     )
                 } else {
                     Text(
                         text = delayText,
-                        style = if (compact) {
-                            MaterialTheme.typography.labelSmall.copy(
-                                fontSize = 10.sp,
-                                lineHeight = 14.sp,
-                            )
-                        } else {
-                            MaterialTheme.typography.labelMedium
-                        },
+                        style = denseTextStyle ?: MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Medium,
                         color = delayColor(delayStatus, delay),
                         maxLines = 1,
@@ -1634,6 +1645,7 @@ private val SingBoxProxyNodeCardHeight = 96.dp
 
 // Compact (multi-column) cards fit a two-line title, a 2dp gap and the 24dp protocol/delay line.
 private val SingBoxProxyNodeCompactCardHeight = 76.dp
+private val SingBoxProxyNodeUltraCompactCardHeight = 52.dp
 private val SingBoxProxyNodeCardTopPadding = 10.dp
 private val SingBoxProxyNodeCardHorizontalPadding = 10.dp
 private val SingBoxProxyNodeCardPadding = PaddingValues(
@@ -1650,4 +1662,10 @@ private fun singBoxProxyNodeSelectedIconEndInset(titleLineHeight: Dp): Dp =
     (SingBoxProxyNodeCardTopPadding - SingBoxProxyNodeCardHorizontalPadding +
         (titleLineHeight - SingBoxProxyNodeSelectedIconSize) / 2).coerceAtLeast(0.dp)
 private val SingBoxProxyNodeGridSpacing = 8.dp
+private val SingBoxProxyNodeUltraCompactCardPadding = PaddingValues(
+    start = 8.dp,
+    top = 8.dp,
+    end = 8.dp,
+    bottom = 6.dp,
+)
 private val SingBoxFloatingToolbarBottomSpacing = 16.dp

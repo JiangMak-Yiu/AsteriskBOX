@@ -92,6 +92,7 @@ import app.modes.OutboundListLayoutAuto
 import app.modes.OutboundListLayoutDouble
 import app.modes.OutboundListLayoutMultiple
 import app.modes.OutboundListLayoutSingle
+import app.modes.OutboundListLayoutUltraCompact
 import app.modes.OutboundListSortDefault
 import app.modes.OutboundListSortLatency
 import app.modes.OutboundListSortName
@@ -808,6 +809,7 @@ internal fun OutboundListPage(
             OutboundPage(
                 onInteractionCountChange = onChildInteractionChange,
                 outbounds = preview.items,
+                ultraCompact = appState.outboundListLayout == OutboundListLayoutUltraCompact,
                 contentPadding = pageListPadding(
                     contentPadding = contentPadding,
                     bottomExtra = outboundListBottomExtraDp().dp,
@@ -966,6 +968,7 @@ private fun OutboundPage(
     dragScrollThresholdBottomPadding: androidx.compose.ui.unit.Dp,
     hasQuery: Boolean,
     columns: Int,
+    ultraCompact: Boolean,
     reorderEnabled: Boolean,
     pingState: OutboundPingRuntimeState,
     onMove: (fromIndex: Int, toIndex: Int) -> Unit,
@@ -1050,6 +1053,7 @@ private fun OutboundPage(
                     OutboundCard(
                         onInteractionCountChange = onInteractionCountChange,
                         item = item,
+                        ultraCompact = ultraCompact,
                         pingState = pingState,
                         isDragging = isDragging && reorderEnabled,
                         onEdit = { onEdit(outbound) },
@@ -1075,6 +1079,7 @@ private fun OutboundPage(
 @Composable
 private fun OutboundCard(
     item: OutboundListItem,
+    ultraCompact: Boolean,
     pingState: OutboundPingRuntimeState,
     isDragging: Boolean,
     onEdit: () -> Unit,
@@ -1104,14 +1109,14 @@ private fun OutboundCard(
         onClick = onEdit,
         modifier = modifier
             .fillMaxWidth()
-            .height(OutboundCardHeight)
+            .height(if (ultraCompact) OutboundUltraCompactCardHeight else OutboundCardHeight)
             .draggedCardLift(lift, cornerRadius = AsteriskShapeTokens.PageCardRadius),
         containerColor = containerColor,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(OutboundCardPadding),
+                .padding(if (ultraCompact) OutboundUltraCompactCardPadding else OutboundCardPadding),
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
             Row(
@@ -1126,12 +1131,13 @@ private fun OutboundCard(
                             lineHeight = 15.sp,
                         ),
                         fontWeight = FontWeight.SemiBold,
-                        maxLines = 2,
+                        maxLines = if (ultraCompact) 1 else 2,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
                 OutboundCardMenu(
                     onInteractionCountChange = onInteractionCountChange,
+                    ultraCompact = ultraCompact,
                     pingEnabled = item.pingHost != null && !pinging,
                     shareUrlResult = shareUrlResult,
                     onEdit = onEdit,
@@ -1143,7 +1149,7 @@ private fun OutboundCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(24.dp)
+                    .height(if (ultraCompact) 18.dp else 24.dp)
                     .padding(end = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -1153,7 +1159,7 @@ private fun OutboundCard(
                     modifier = Modifier.weight(1f, fill = false),
                     textStyle = MaterialTheme.typography.labelSmall.copy(
                         fontSize = 10.sp,
-                        lineHeight = 14.sp,
+                        lineHeight = if (ultraCompact) 12.sp else 14.sp,
                     ),
                 )
                 OutboundPingStatus(item.pingLatencyMillis(pingState), pinging)
@@ -1171,6 +1177,7 @@ private fun OutboundCardMenu(
     onPing: () -> Unit,
     onDelete: () -> Unit,
     onInteractionCountChange: (Int) -> Unit = {},
+    ultraCompact: Boolean = false,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     TrackOutboundInteraction(menuExpanded, onInteractionCountChange)
@@ -1182,18 +1189,20 @@ private fun OutboundCardMenu(
     val menuSpatialMotion = AsteriskMotion.fastSpatial<IntOffset>()
     val menuSizeMotion = AsteriskMotion.fastSpatial<IntSize>()
     val menuEffectsMotion = AsteriskMotion.fastEffects<Float>()
+    val iconOffset = if (ultraCompact) OutboundUltraCompactCardMenuIconOffset else OutboundCardMenuIconOffset
     Box(
         modifier = Modifier.offset(
-            x = OutboundCardMenuIconOffset.x.dp,
-            y = OutboundCardMenuIconOffset.y.dp,
+            x = iconOffset.x.dp,
+            y = iconOffset.y.dp,
         ),
     ) {
         // The 76dp card has no room for a 48dp touch target; keep the icon aligned to the
-        // card's content edge with a 32dp button instead of overflowing the card.
+        // card's content edge with a 32dp button instead of overflowing the card. The
+        // ultra-compact card shrinks it to 24dp so the title row stays 24dp tall.
         CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
             IconButton(
                 onClick = { menuExpanded = true },
-                modifier = Modifier.size(32.dp),
+                modifier = Modifier.size(if (ultraCompact) 24.dp else 32.dp),
             ) {
                 Icon(
                     imageVector = Icons.Rounded.MoreVert,
@@ -1363,6 +1372,7 @@ private fun OutboundOptionsMenu(
             OutboundListLayoutSingle -> R.string.outbound_option_layout_single
             OutboundListLayoutDouble -> R.string.outbound_option_layout_double
             OutboundListLayoutMultiple -> R.string.outbound_option_layout_multiple
+            OutboundListLayoutUltraCompact -> R.string.outbound_option_layout_ultracompact
             else -> R.string.outbound_option_layout_auto
         },
     )
@@ -1536,6 +1546,11 @@ private fun OutboundOptionsMenu(
                                     R.string.outbound_option_layout_multiple,
                                     Icons.Rounded.GridView,
                                 ),
+                                Triple(
+                                    OutboundListLayoutUltraCompact,
+                                    R.string.outbound_option_layout_ultracompact,
+                                    Icons.Rounded.ViewAgenda,
+                                ),
                             ).forEach { (value, label, _) ->
                                 AsteriskDropdownMenuItem(
                                     text = stringResource(label),
@@ -1622,10 +1637,17 @@ private val OutboundOptionsMenuWidth = 224.dp
 private val OutboundCardMenuWidth = 224.dp
 private val OutboundGridSpacing = OutboundGridSpacingDp.dp
 private val OutboundCardHeight = OutboundCardHeightDp.dp
+private val OutboundUltraCompactCardHeight = OutboundUltraCompactCardHeightDp.dp
 private val OutboundCardPadding =
     PaddingValues(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 8.dp)
+private val OutboundUltraCompactCardPadding =
+    PaddingValues(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 6.dp)
 private val OutboundCardMenuIconOffset = outboundCardMenuIconOffsetDp(
     touchTargetDp = 32,
+    iconSizeDp = 24,
+)
+private val OutboundUltraCompactCardMenuIconOffset = outboundCardMenuIconOffsetDp(
+    touchTargetDp = 24,
     iconSizeDp = 24,
 )
 private val OutboundEmptyStateMinHeight = 320.dp

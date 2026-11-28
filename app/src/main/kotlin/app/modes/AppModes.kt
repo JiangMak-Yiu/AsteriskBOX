@@ -44,6 +44,7 @@ const val SingBoxProxyLayoutAuto = 0
 const val SingBoxProxyLayoutSingle = 1
 const val SingBoxProxyLayoutDouble = 2
 const val SingBoxProxyLayoutMultiple = 3
+const val SingBoxProxyLayoutUltraCompact = 4
 
 const val SingBoxProxyGroupLayoutExpandable = 0
 const val SingBoxProxyGroupLayoutTabs = 1
@@ -56,6 +57,7 @@ const val OutboundListLayoutAuto = 0
 const val OutboundListLayoutSingle = 1
 const val OutboundListLayoutDouble = 2
 const val OutboundListLayoutMultiple = 3
+const val OutboundListLayoutUltraCompact = 4
 
 const val OutboundListSortDefault = 0
 const val OutboundListSortName = 1
