@@ -329,6 +329,23 @@
     <string name="monitor_network_quality_upload_capacity_explanation">持续上传吞吐量。高于 100 Mbps 为优秀，30–100 Mbps 为可接受，低于 30 Mbps 视为受限。</string>
     <string name="monitor_network_quality_upload_responsiveness">上行响应度</string>
     <string name="monitor_network_quality_upload_responsiveness_explanation">链路满载时每分钟可完成的小文件上传次数，评判标准与下行响应度相同。</string>
+    <string name="settings_speed_test">网络测速</string>
+    <string name="settings_speed_test_summary">测延迟、下载与上传（走当前代理链路）</string>
+    <string name="speed_test_title">网络测速</string>
+    <string name="speed_test_start">开始测速</string>
+    <string name="speed_test_stop">停止</string>
+    <string name="speed_test_idle">点击开始测速</string>
+    <string name="speed_test_phase_latency">正在测延迟</string>
+    <string name="speed_test_phase_download">正在测下载</string>
+    <string name="speed_test_phase_upload">正在测上传</string>
+    <string name="speed_test_phase_done">测速完成</string>
+    <string name="speed_test_phase_failed">测速失败</string>
+    <string name="speed_test_latency">延迟</string>
+    <string name="speed_test_jitter">抖动</string>
+    <string name="speed_test_download">下载</string>
+    <string name="speed_test_upload">上传</string>
+    <string name="speed_test_exit">出口</string>
+    <string name="speed_test_hint">走当前代理链路，约消耗 50 MB 流量。</string>
     <string name="settings_network_quality_test">网络质量测试</string>
     <string name="settings_network_quality_test_summary">使用 Apple networkQuality 测试网速与响应度</string>
 

@@ -59,6 +59,9 @@ sealed interface Route : NavKey {
     data object SelectorManagement : Route
 
     @Serializable
+    data object SpeedTest : Route
+
+    @Serializable
     data object EndpointList : Route
 
     @Serializable

@@ -336,6 +336,23 @@
     <string name="monitor_network_quality_upload_capacity_explanation">Sustained upload throughput. Above 100 Mbps is great; 30–100 Mbps is acceptable; under 30 Mbps is constrained.</string>
     <string name="monitor_network_quality_upload_responsiveness">Upload responsiveness</string>
     <string name="monitor_network_quality_upload_responsiveness_explanation">How many small uploads the link can finish per minute while busy. Same scale as download responsiveness.</string>
+    <string name="settings_speed_test">Network speed test</string>
+    <string name="settings_speed_test_summary">Latency, download and upload through the current proxy</string>
+    <string name="speed_test_title">Speed test</string>
+    <string name="speed_test_start">Start</string>
+    <string name="speed_test_stop">Stop</string>
+    <string name="speed_test_idle">Tap start to measure</string>
+    <string name="speed_test_phase_latency">Measuring latency</string>
+    <string name="speed_test_phase_download">Testing download</string>
+    <string name="speed_test_phase_upload">Testing upload</string>
+    <string name="speed_test_phase_done">Finished</string>
+    <string name="speed_test_phase_failed">Speed test failed</string>
+    <string name="speed_test_latency">Latency</string>
+    <string name="speed_test_jitter">Jitter</string>
+    <string name="speed_test_download">Download</string>
+    <string name="speed_test_upload">Upload</string>
+    <string name="speed_test_exit">Exit</string>
+    <string name="speed_test_hint">Runs through the current proxy and uses about 50 MB of traffic.</string>
     <string name="settings_network_quality_test">Network quality test</string>
     <string name="settings_network_quality_test_summary">Test speed and latency via Apple networkQuality</string>
 

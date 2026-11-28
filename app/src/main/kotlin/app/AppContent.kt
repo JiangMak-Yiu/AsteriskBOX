@@ -117,6 +117,7 @@ import features.routing.RouteRuleEditorPage
 import features.routing.RoutingManagementPage
 import features.selector.SelectorEditorPage
 import features.selector.SelectorManagementPage
+import features.toolbox.SpeedTestPage
 import features.settings.SettingsPage
 import features.singbox.SingBoxDashboardPage
 import features.singbox.SingBoxOverrideScriptPage
@@ -264,6 +265,9 @@ fun AppContent(
                 }
                 entry<Route.SelectorManagement> {
                     SelectorManagementPage(padding = padding)
+                }
+                entry<Route.SpeedTest> {
+                    SpeedTestPage(padding = padding)
                 }
                 entry<Route.SelectorEdit> { route ->
                     key(route.selectorId) {

@@ -8,11 +8,13 @@ import engine.singbox.SingBoxLogLevels
 internal enum class SettingsToolsItem {
     ConfigPreview,
     NetworkQualityTest,
+    SpeedTest,
 }
 
 internal val SettingsToolsItems = listOf(
     SettingsToolsItem.ConfigPreview,
     SettingsToolsItem.NetworkQualityTest,
+    SettingsToolsItem.SpeedTest,
 )
 
 internal enum class SettingsCoreItem {
