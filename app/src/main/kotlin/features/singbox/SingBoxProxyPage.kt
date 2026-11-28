@@ -38,6 +38,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -595,6 +596,7 @@ fun SingBoxProxyPage(
                                             locateRequestTrigger++
                                         },
                                         onDelayTest = { testGroup(group) },
+                                        ultraCompact = proxyLayout == SingBoxProxyLayoutUltraCompact,
                                         modifier = Modifier.animateItem(
                                             fadeInSpec = AsteriskMotion.contentFade(),
                                             placementSpec = AsteriskMotion.contentPlacement(),
@@ -820,49 +822,69 @@ private fun SingBoxProxyGroupCard(
     onLocate: () -> Unit,
     onDelayTest: () -> Unit,
     modifier: Modifier = Modifier,
+    ultraCompact: Boolean = false,
 ) {
     val expansionState = stringResource(
         if (expanded) R.string.sing_box_proxies_group_expanded else R.string.sing_box_proxies_group_collapsed,
     )
+    val actionSize = if (ultraCompact) 32.dp else 48.dp
+    val statusLine = if (testing && testingTotal > 0) {
+        stringResource(
+            R.string.sing_box_proxies_delay_testing_progress,
+            testingCompleted.coerceAtMost(testingTotal),
+            testingTotal,
+        )
+    } else {
+        "${group.type.displaySingBoxProtocolName()} · ${group.all.size}"
+    }
     AsteriskExpressiveCard(
         expanded = expanded,
         selected = expanded,
         onClick = onToggle,
+        shape = if (ultraCompact) ui.theme.AsteriskShapeTokens.ExtraSmallContainer else null,
         modifier = modifier.fillMaxWidth().semantics {
             role = Role.Button
             stateDescription = expansionState
         },
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier = Modifier.fillMaxWidth().padding(
+                horizontal = if (ultraCompact) 10.dp else 16.dp,
+                vertical = if (ultraCompact) 6.dp else 12.dp,
+            ),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(if (ultraCompact) 4.dp else 8.dp),
         ) {
             Column(
                 modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp),
+                verticalArrangement = Arrangement.spacedBy(if (ultraCompact) 2.dp else 4.dp),
             ) {
                 Text(
                     text = group.displayName,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = if (ultraCompact) {
+                        MaterialTheme.typography.titleSmall.copy(fontSize = 12.sp, lineHeight = 15.sp)
+                    } else {
+                        MaterialTheme.typography.titleMedium
+                    },
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    text = if (testing && testingTotal > 0) {
-                        stringResource(
-                            R.string.sing_box_proxies_delay_testing_progress,
-                            testingCompleted.coerceAtMost(testingTotal),
-                            testingTotal,
-                        )
+                    // 极致紧凑只留一行副标题，当前节点并进来。
+                    text = if (ultraCompact && currentDisplayName.isNotBlank()) {
+                        "$statusLine · $currentDisplayName"
                     } else {
-                        "${group.type.displaySingBoxProtocolName()} · ${group.all.size}"
+                        statusLine
                     },
-                    style = MaterialTheme.typography.labelSmall,
+                    style = if (ultraCompact) {
+                        MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, lineHeight = 12.sp)
+                    } else {
+                        MaterialTheme.typography.labelSmall
+                    },
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                if (currentDisplayName.isNotBlank()) {
+                if (!ultraCompact && currentDisplayName.isNotBlank()) {
                     Text(
                         text = currentDisplayName,
                         style = MaterialTheme.typography.bodySmall,
@@ -872,25 +894,30 @@ private fun SingBoxProxyGroupCard(
                     )
                 }
             }
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(
-                    onClick = onLocate,
-                    enabled = canLocate,
-                    modifier = Modifier.size(48.dp),
-                ) {
-                    Icon(Icons.Rounded.MyLocation, stringResource(R.string.sing_box_proxies_locate_selected))
-                }
-                Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) {
-                    if (testing) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
-                    } else {
-                        IconButton(onClick = onDelayTest, enabled = delayTestEnabled) {
-                            Icon(Icons.Rounded.Speed, stringResource(R.string.sing_box_proxies_group_test))
+            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(
+                        onClick = onLocate,
+                        enabled = canLocate,
+                        modifier = Modifier.size(actionSize),
+                    ) {
+                        Icon(Icons.Rounded.MyLocation, stringResource(R.string.sing_box_proxies_locate_selected))
+                    }
+                    Box(Modifier.size(actionSize), contentAlignment = Alignment.Center) {
+                        if (testing) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(if (ultraCompact) 16.dp else 24.dp),
+                                strokeWidth = 2.dp,
+                            )
+                        } else {
+                            IconButton(onClick = onDelayTest, enabled = delayTestEnabled) {
+                                Icon(Icons.Rounded.Speed, stringResource(R.string.sing_box_proxies_group_test))
+                            }
                         }
                     }
-                }
-                Box(Modifier.size(48.dp), contentAlignment = Alignment.Center) {
-                    AsteriskExpansionIndicator(expanded = expanded)
+                    Box(Modifier.size(actionSize), contentAlignment = Alignment.Center) {
+                        AsteriskExpansionIndicator(expanded = expanded)
+                    }
                 }
             }
         }
