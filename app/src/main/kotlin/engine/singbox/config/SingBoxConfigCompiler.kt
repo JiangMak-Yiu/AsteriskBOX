@@ -485,6 +485,15 @@ internal fun compileTunInbound(
     }
 }
 
+/**
+ * 旧版导入或手工改动可能残留 packet_encoding: none；sing-box 只认 packetaddr / xudp / 缺省，
+ * 原样交给内核会让整份配置校验失败（unknown packet encoding: none），编译时统一剔除。
+ */
+private fun MutableMap<String, JsonElement>.dropUnknownPacketEncoding() {
+    val value = (get("packet_encoding") as? JsonPrimitive)?.contentOrNull ?: return
+    if (value.isBlank() || value.equals("none", ignoreCase = true)) remove("packet_encoding")
+}
+
 internal fun compileOutbounds(root: JsonObject, appState: AppState): JsonArray {
     val enabledGroups = appState.outboundGroups
         .filter { group -> group.enabled }
@@ -501,6 +510,7 @@ internal fun compileOutbounds(root: JsonObject, appState: AppState): JsonArray {
                     outbound.groupId to JsonObject(
                         buildMap {
                             putAll(parsed)
+                            dropUnknownPacketEncoding()
                             put("type", JsonPrimitive(outbound.type))
                             put("tag", JsonPrimitive(outbound.tag))
                             outbound.inheritedGroupDetour(groupDetours[outbound.groupId].orEmpty(), parsed)
