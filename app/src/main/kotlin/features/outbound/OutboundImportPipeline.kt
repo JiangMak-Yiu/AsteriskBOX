@@ -481,7 +481,7 @@ internal object MihomoYamlOutboundParser {
                     )
                     putIfTrue("global_padding", bool("global-padding"))
                     putIfTrue("authenticated_length", bool("authenticated-length"))
-                    putNotBlank("packet_encoding", stringOrEmpty("packet-encoding"))
+                    putNotBlank("packet_encoding", stringOrEmpty("packet-encoding").normalizedPacketEncoding())
                 }
                 "trojan" -> putNotBlank("password", stringOrEmpty("password"))
                 "hysteria" -> {
@@ -497,7 +497,8 @@ internal object MihomoYamlOutboundParser {
                 "vless" -> {
                     putNotBlank("uuid", stringOrEmpty("uuid"))
                     putNotBlank("flow", stringOrEmpty("flow"))
-                    putNotBlank("packet_encoding", stringOrEmpty("packet-encoding"))
+                    putNotBlank("packet_encoding", stringOrEmpty("packet-encoding").normalizedPacketEncoding())
+
                     // VLESS Encryption runs on the VLESS (Xray) plugin.
                     putNotBlank(
                         "encryption",
@@ -1124,7 +1125,7 @@ private object ProxyUrlOutboundParser {
                     putPositive("alter_id", query.intOrZero("alterId", "alter-id", "aid"))
                     putNotBlank(
                         "packet_encoding",
-                        query.first("packetEncoding", "packet_encoding"),
+                        query.first("packetEncoding", "packet_encoding").normalizedPacketEncoding(),
                     )
                 }
                 "trojan" -> putNotBlank("password", authentication)
@@ -1137,7 +1138,10 @@ private object ProxyUrlOutboundParser {
                 "vless" -> {
                     putNotBlank("uuid", credentials.first)
                     putNotBlank("flow", query.first("flow"))
-                    putNotBlank("packet_encoding", query.first("packetEncoding", "packet_encoding"))
+                    putNotBlank(
+                        "packet_encoding",
+                        query.first("packetEncoding", "packet_encoding").normalizedPacketEncoding(),
+                    )
                     putNotBlank("encryption", vlessEncryption.takeUnless { it.equals("none", ignoreCase = true) }.orEmpty())
                     vlessXrayFinalmask(query)?.let { mask -> put("xray_finalmask", mask) }
                 }
@@ -2083,6 +2087,13 @@ private fun kotlinx.serialization.json.JsonObjectBuilder.putListable(
 private fun kotlinx.serialization.json.JsonObjectBuilder.putNotBlank(name: String, value: String) {
     if (value.isNotBlank()) put(name, value)
 }
+
+/**
+ * sing-box 只认得 packetaddr 与 xudp；mihomo/分享链接常把关闭状态写成 "none"，
+ * 原样写进配置会让内核校验失败（unknown packet encoding: none），所以当作未设置。
+ */
+private fun String.normalizedPacketEncoding(): String =
+    takeUnless { it.equals("none", ignoreCase = true) }.orEmpty()
 
 private fun kotlinx.serialization.json.JsonObjectBuilder.putPositive(name: String, value: Int) {
     if (value > 0) put(name, value)
