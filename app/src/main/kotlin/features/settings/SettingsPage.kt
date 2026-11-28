@@ -654,7 +654,6 @@ private fun SettingsContent(
                 SettingsToolsSection(
                     onOpenConfigPreview = { showConfigPreview = true },
                     onOpenNetworkQualityTest = { sheetState.openNetworkQualityTest() },
-                    onOpenSpeedTest = { navigator.push(Route.SpeedTest) },
                 )
             }
             settingsSection("settings_backup_restore") {

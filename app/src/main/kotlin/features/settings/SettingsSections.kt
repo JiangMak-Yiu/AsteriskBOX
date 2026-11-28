@@ -156,7 +156,6 @@ private fun HideLauncherIconPreference(
 internal fun SettingsToolsSection(
     onOpenConfigPreview: () -> Unit,
     onOpenNetworkQualityTest: () -> Unit,
-    onOpenSpeedTest: () -> Unit,
 ) {
     SmallTitle(text = stringResource(R.string.settings_tools))
     SettingsSectionCard {
@@ -175,13 +174,6 @@ internal fun SettingsToolsSection(
                     summary = stringResource(R.string.settings_network_quality_test_summary),
                     onClick = onOpenNetworkQualityTest,
                     accent = IconAccent.MaskBlueVariant,
-                )
-                SettingsToolsItem.SpeedTest -> ArrowPreference(
-                    title = stringResource(R.string.settings_speed_test),
-                    icon = Icons.Rounded.Speed,
-                    summary = stringResource(R.string.settings_speed_test_summary),
-                    onClick = onOpenSpeedTest,
-                    accent = IconAccent.MaskBlue,
                 )
             }
         }
