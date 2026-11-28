@@ -45,7 +45,7 @@ internal fun resolveOutboundListColumns(
     OutboundListLayoutSingle -> 1
     OutboundListLayoutDouble -> 2
     OutboundListLayoutMultiple -> 3
-    OutboundListLayoutUltraCompact -> 3
+    OutboundListLayoutUltraCompact -> 2
     OutboundListLayoutAuto -> if (isWideScreen) 3 else 2
     else -> if (isWideScreen) 3 else 2
 }

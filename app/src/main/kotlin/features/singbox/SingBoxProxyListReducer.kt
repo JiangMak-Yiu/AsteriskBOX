@@ -170,7 +170,8 @@ internal fun resolveSingBoxProxyLayout(layout: Int, isWideScreen: Boolean): Int 
 internal fun resolveSingBoxProxyColumns(layout: Int): Int {
     return when (layout) {
         SingBoxProxyLayoutSingle -> 1
-        SingBoxProxyLayoutMultiple, SingBoxProxyLayoutUltraCompact -> 3
+        SingBoxProxyLayoutMultiple -> 3
+        SingBoxProxyLayoutUltraCompact -> 2
         else -> 2
     }
 }
