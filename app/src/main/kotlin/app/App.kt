@@ -228,6 +228,7 @@ fun App(
     ) {
         AppTheme(
             colorMode = chromeState.colorMode,
+            uiScalePercent = chromeState.uiScalePercent,
             keyColor = keyColor,
             systemDark = systemUiSnapshot.isDark,
         ) {

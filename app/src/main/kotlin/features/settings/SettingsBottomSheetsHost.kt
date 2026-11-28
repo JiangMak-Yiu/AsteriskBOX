@@ -434,6 +434,7 @@ internal fun SettingsBottomSheetsHost(
         networkActivityStyle = appState.networkActivityStyle,
         navigationBarStyle = appState.navigationBarStyle,
         autoHideNavigationBar = appState.autoHideNavigationBar,
+        uiScalePercent = appState.uiScalePercent,
         onColorModeChange = { index ->
             updateAppState { state -> state.copy(colorMode = index) }
         },
@@ -445,6 +446,9 @@ internal fun SettingsBottomSheetsHost(
         },
         onNavigationBarStyleChange = { style ->
             updateAppState { state -> state.copy(navigationBarStyle = style) }
+        },
+        onUiScalePercentChange = { percent ->
+            updateAppState { state -> state.copy(uiScalePercent = percent) }
         },
         onAutoHideNavigationBarChange = { enabled ->
             updateAppState { state -> state.copy(autoHideNavigationBar = enabled) }

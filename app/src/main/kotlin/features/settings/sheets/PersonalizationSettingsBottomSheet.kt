@@ -35,11 +35,13 @@ internal fun PersonalizationSettingsBottomSheet(
     networkActivityStyle: Int,
     navigationBarStyle: Int,
     autoHideNavigationBar: Boolean,
+    uiScalePercent: Int,
     onColorModeChange: (Int) -> Unit,
     onSeedIndexChange: (Int) -> Unit,
     onNetworkActivityStyleChange: (Int) -> Unit,
     onNavigationBarStyleChange: (Int) -> Unit,
     onAutoHideNavigationBarChange: (Boolean) -> Unit,
+    onUiScalePercentChange: (Int) -> Unit,
     onDismissRequest: () -> Unit,
 ) {
     AsteriskModalBottomSheet(
@@ -58,11 +60,13 @@ internal fun PersonalizationSettingsBottomSheet(
                     networkActivityStyle = networkActivityStyle,
                     navigationBarStyle = navigationBarStyle,
                     autoHideNavigationBar = autoHideNavigationBar,
+                    uiScalePercent = uiScalePercent,
                     onColorModeChange = onColorModeChange,
                     onSeedIndexChange = onSeedIndexChange,
                     onNetworkActivityStyleChange = onNetworkActivityStyleChange,
                     onNavigationBarStyleChange = onNavigationBarStyleChange,
                     onAutoHideNavigationBarChange = onAutoHideNavigationBarChange,
+                    onUiScalePercentChange = onUiScalePercentChange,
                 )
             }
         }

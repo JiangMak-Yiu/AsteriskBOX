@@ -18,9 +18,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -33,6 +37,7 @@ import app.R
 import app.modes.NavigationBarStyleClassic
 import app.modes.NavigationBarStyleCompact
 import ui.KeyColors
+import kotlin.math.roundToInt
 import ui.components.AsteriskSegmentItem
 import ui.components.AsteriskSegmentedControl
 import ui.components.IconAccent
@@ -60,17 +65,23 @@ internal fun PersonalizationSettingsContent(
     networkActivityStyle: Int,
     navigationBarStyle: Int,
     autoHideNavigationBar: Boolean,
+    uiScalePercent: Int,
     onColorModeChange: (Int) -> Unit,
     onSeedIndexChange: (Int) -> Unit,
     onNetworkActivityStyleChange: (Int) -> Unit,
     onNavigationBarStyleChange: (Int) -> Unit,
     onAutoHideNavigationBarChange: (Boolean) -> Unit,
+    onUiScalePercentChange: (Int) -> Unit,
 ) {
     SettingsSegmentedRow(
         title = stringResource(R.string.settings_color_mode),
         options = colorModeOptions,
         selectedIndex = colorMode,
         onSelectedIndexChange = onColorModeChange,
+    )
+    UiScaleSlider(
+        percent = uiScalePercent,
+        onChange = onUiScalePercentChange,
     )
     ThemeColorDotPicker(
         options = keyColorOptions,
@@ -103,6 +114,36 @@ internal fun PersonalizationSettingsContent(
         onCheckedChange = onAutoHideNavigationBarChange,
         accent = IconAccent.MaskBlueVariant,
     )
+}
+
+/** 界面缩放（80%–130%）：松手才应用，避免拖动过程中整屏连续重排。 */
+@Composable
+private fun UiScaleSlider(percent: Int, onChange: (Int) -> Unit) {
+    var draft by remember(percent) { mutableIntStateOf(percent.coerceIn(80, 130)) }
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = stringResource(R.string.settings_ui_scale),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                text = "$draft%",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
+        Slider(
+            value = draft.toFloat(),
+            onValueChange = { draft = it.roundToInt() },
+            onValueChangeFinished = { onChange(draft.coerceIn(80, 130)) },
+            valueRange = 80f..130f,
+            steps = 9,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
 }
 
 @Composable

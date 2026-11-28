@@ -1716,6 +1716,7 @@
     <string name="option_nav_bar_compact">Compact</string>
     <string name="option_simplified_chinese">中文（简体）</string>
     <string name="settings_app">Appearance</string>
+    <string name="settings_ui_scale">Interface scale</string>
     <string name="settings_color_mode">Theme</string>
     <string name="settings_language">Language</string>
     <string name="settings_personalization">Personalization</string>

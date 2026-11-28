@@ -39,6 +39,7 @@ internal fun AppState.preferenceValues(): Map<String, AppPreferenceValue> = buil
     int(KeyNetworkActivityStyle, networkActivityStyle)
     int(KeyLanguageMode, languageMode)
     int(KeySeedIndex, seedIndex)
+    int(KeyUiScalePercent, uiScalePercent)
     boolean(KeyHideRecentTasks, hideRecentTasks)
     boolean(KeyAllowScreenshots, allowScreenshots)
     boolean(KeyHideLauncherIcon, hideLauncherIcon)

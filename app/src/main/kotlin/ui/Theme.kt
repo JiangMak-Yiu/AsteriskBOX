@@ -40,7 +40,9 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.WindowCompat
@@ -72,6 +74,7 @@ fun AppTheme(
     colorMode: Int = ColorModeSystem,
     keyColor: Color? = null,
     systemDark: Boolean,
+    uiScalePercent: Int = 100,
     content: @Composable () -> Unit,
 ) {
     SynchronizeSplashTheme(colorMode)
@@ -131,19 +134,27 @@ fun AppTheme(
         LocalResolvedDarkTheme provides displayedIsDark,
         LocalReduceMotion provides !animationsEnabled,
     ) {
-        CompositionLocalProvider(LocalSpacing provides AsteriskSpacing()) {
-            AsteriskMaterialTheme(colorScheme = displayedScheme) {
-                SystemBarAppearance(
-                    colorScheme = displayedScheme,
-                    isDark = systemBarIsDark,
-                )
-                ThemeTransitionOverlay(
-                    transitionActive = transitionActive,
-                    transitionProgress = transitionProgress,
-                    startTint = transitionStartTint,
-                    endTint = transitionEndTint,
-                    content = content,
-                )
+        // 界面缩放：density 与 fontScale 一起乘，间距/圆角/图标/文字等比变化。
+        val baseDensity = LocalDensity.current
+        val scale = (uiScalePercent.coerceIn(80, 130)) / 100f
+        val scaledDensity = remember(baseDensity, scale) {
+            Density(density = baseDensity.density * scale, fontScale = baseDensity.fontScale * scale)
+        }
+        CompositionLocalProvider(LocalDensity provides scaledDensity) {
+            CompositionLocalProvider(LocalSpacing provides AsteriskSpacing()) {
+                AsteriskMaterialTheme(colorScheme = displayedScheme) {
+                    SystemBarAppearance(
+                        colorScheme = displayedScheme,
+                        isDark = systemBarIsDark,
+                    )
+                    ThemeTransitionOverlay(
+                        transitionActive = transitionActive,
+                        transitionProgress = transitionProgress,
+                        startTint = transitionStartTint,
+                        endTint = transitionEndTint,
+                        content = content,
+                    )
+                }
             }
         }
     }

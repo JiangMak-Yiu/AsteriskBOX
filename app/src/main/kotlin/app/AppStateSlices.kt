@@ -16,6 +16,7 @@ data class AppChromeState(
     val colorMode: Int,
     val languageMode: Int,
     val seedIndex: Int,
+    val uiScalePercent: Int,
 )
 
 val LocalAppStateStore = staticCompositionLocalOf<AndroidAppStateStore> {
@@ -48,5 +49,6 @@ private fun AppState.toAppChromeState(): AppChromeState {
         colorMode = colorMode,
         languageMode = languageMode,
         seedIndex = seedIndex,
+        uiScalePercent = uiScalePercent,
     )
 }

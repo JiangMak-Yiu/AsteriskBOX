@@ -1690,6 +1690,7 @@
     <string name="option_nav_bar_compact">紧凑</string>
     <string name="option_simplified_chinese">中文（简体）</string>
     <string name="settings_app">外观</string>
+    <string name="settings_ui_scale">界面缩放</string>
     <string name="settings_color_mode">主题</string>
     <string name="settings_language">语言</string>
     <string name="settings_personalization">个性化</string>

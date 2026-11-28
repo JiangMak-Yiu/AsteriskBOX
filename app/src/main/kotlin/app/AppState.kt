@@ -44,6 +44,7 @@ import features.dns.withIpv4FakeIpSettings
 
 data class AppState(
     val colorMode: Int = ColorModeSystem,
+    val uiScalePercent: Int = 100,
     val languageMode: Int = LanguageModeSystem,
     val seedIndex: Int = 0,
     val networkActivityStyle: Int = NetworkActivityStyleDotted,

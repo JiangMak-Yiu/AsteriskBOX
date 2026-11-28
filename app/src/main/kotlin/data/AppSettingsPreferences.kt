@@ -58,6 +58,8 @@ internal class AppSettingsPreferences(
             ),
             languageMode = preferences.getInt(KeyLanguageMode, defaults.languageMode),
             seedIndex = preferences.getInt(KeySeedIndex, defaults.seedIndex),
+            uiScalePercent = preferences.getInt(KeyUiScalePercent, defaults.uiScalePercent)
+                .coerceIn(80, 130),
             hideRecentTasks = preferences.getBoolean(KeyHideRecentTasks, defaults.hideRecentTasks),
             allowScreenshots = preferences.getBoolean(KeyAllowScreenshots, defaults.allowScreenshots),
             hideLauncherIcon = preferences.getBoolean(KeyHideLauncherIcon, defaults.hideLauncherIcon),
@@ -457,6 +459,7 @@ internal const val KeyColorMode = "color_mode"
 internal const val KeyNetworkActivityStyle = "network_activity_style"
 internal const val KeyLanguageMode = "language_mode"
 internal const val KeySeedIndex = "seed_index"
+internal const val KeyUiScalePercent = "ui_scale_percent"
 internal const val KeyHideRecentTasks = "hide_recent_tasks"
 internal const val KeyAllowScreenshots = "allow_screenshots"
 internal const val KeyHideLauncherIcon = "hide_launcher_icon"

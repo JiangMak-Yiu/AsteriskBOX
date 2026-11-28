@@ -53,6 +53,7 @@ internal data class AppBackupSettings(
     val colorMode: Int = BackupDefaults.colorMode,
     val languageMode: Int = BackupDefaults.languageMode,
     val seedIndex: Int = BackupDefaults.seedIndex,
+    val uiScalePercent: Int = BackupDefaults.uiScalePercent,
     val networkActivityStyle: Int = BackupDefaults.networkActivityStyle,
     val hideRecentTasks: Boolean = BackupDefaults.hideRecentTasks,
     val allowScreenshots: Boolean = BackupDefaults.allowScreenshots,
