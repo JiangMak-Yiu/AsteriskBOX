@@ -8,6 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 
 @Composable
 internal fun AsteriskSelectionCard(
@@ -17,6 +18,7 @@ internal fun AsteriskSelectionCard(
     enabled: Boolean = true,
     containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
     selectedContainerColor: Color = MaterialTheme.colorScheme.surfaceContainerHighest,
+    shape: Shape? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     AsteriskExpressiveCard(
@@ -26,6 +28,7 @@ internal fun AsteriskSelectionCard(
         onClick = onClick,
         containerColor = containerColor,
         selectedContainerColor = selectedContainerColor,
+        shape = shape,
         content = content,
     )
 }

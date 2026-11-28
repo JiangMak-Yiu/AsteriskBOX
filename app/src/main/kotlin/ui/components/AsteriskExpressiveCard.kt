@@ -37,6 +37,7 @@ internal fun AsteriskExpressiveCard(
     containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
     selectedContainerColor: Color = MaterialTheme.colorScheme.surfaceContainerHighest,
     border: BorderStroke? = null,
+    shape: Shape? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -46,7 +47,7 @@ internal fun AsteriskExpressiveCard(
         selected -> ExpressiveInteractionState.Selected
         else -> ExpressiveInteractionState.Rest
     }
-    val shape = rememberExpressiveShape(role, interactionState)
+    val cardShape = shape ?: rememberExpressiveShape(role, interactionState)
     val cardModifier = if (onClick == null) modifier else modifier.heightIn(min = 48.dp)
     val colors = CardDefaults.cardColors(
         containerColor = if (selected) selectedContainerColor else containerColor,
@@ -62,7 +63,7 @@ internal fun AsteriskExpressiveCard(
     if (onClick == null) {
         Card(
             modifier = cardModifier,
-            shape = shape,
+            shape = cardShape,
             colors = colors,
             border = resolvedBorder,
             content = content,
@@ -72,7 +73,7 @@ internal fun AsteriskExpressiveCard(
             onClick = onClick,
             modifier = cardModifier,
             enabled = enabled,
-            shape = shape,
+            shape = cardShape,
             colors = colors,
             border = resolvedBorder,
             interactionSource = interactionSource,

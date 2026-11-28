@@ -1392,6 +1392,7 @@ private fun SingBoxProxyNodeCard(
         enabled = selectionEnabled,
         onClick = onSelect,
         modifier = cardModifier,
+        shape = if (ultraCompact) ui.theme.AsteriskShapeTokens.ExtraSmallContainer else null,
     ) {
         content()
     }

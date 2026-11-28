@@ -1110,8 +1110,13 @@ private fun OutboundCard(
         modifier = modifier
             .fillMaxWidth()
             .height(if (ultraCompact) OutboundUltraCompactCardHeight else OutboundCardHeight)
-            .draggedCardLift(lift, cornerRadius = AsteriskShapeTokens.PageCardRadius),
+            .draggedCardLift(
+                lift,
+                cornerRadius = if (ultraCompact) AsteriskShapeTokens.ExtraSmallContainerRadius
+                else AsteriskShapeTokens.PageCardRadius,
+            ),
         containerColor = containerColor,
+        shape = if (ultraCompact) AsteriskShapeTokens.ExtraSmallContainer else null,
     ) {
         Column(
             modifier = Modifier
