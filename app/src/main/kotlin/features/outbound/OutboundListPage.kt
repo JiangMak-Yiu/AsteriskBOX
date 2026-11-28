@@ -1050,7 +1050,6 @@ private fun OutboundPage(
                     OutboundCard(
                         onInteractionCountChange = onInteractionCountChange,
                         item = item,
-                        compact = columns > 1,
                         pingState = pingState,
                         isDragging = isDragging && reorderEnabled,
                         onEdit = { onEdit(outbound) },
@@ -1076,7 +1075,6 @@ private fun OutboundPage(
 @Composable
 private fun OutboundCard(
     item: OutboundListItem,
-    compact: Boolean,
     pingState: OutboundPingRuntimeState,
     isDragging: Boolean,
     onEdit: () -> Unit,
@@ -1106,7 +1104,7 @@ private fun OutboundCard(
         onClick = onEdit,
         modifier = modifier
             .fillMaxWidth()
-            .height(if (compact) OutboundCompactCardHeight else OutboundCardHeight)
+            .height(OutboundCardHeight)
             .draggedCardLift(lift, cornerRadius = AsteriskShapeTokens.PageCardRadius),
         containerColor = containerColor,
     ) {
@@ -1123,31 +1121,16 @@ private fun OutboundCard(
                 Column(modifier = Modifier.weight(1f).padding(top = 2.dp)) {
                     Text(
                         text = outbound.remarks.ifBlank { outbound.type },
-                        style = if (compact) {
-                            MaterialTheme.typography.titleSmall.copy(
-                                fontSize = 12.sp,
-                                lineHeight = 15.sp,
-                            )
-                        } else {
-                            MaterialTheme.typography.titleMedium
-                        },
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            fontSize = 12.sp,
+                            lineHeight = 15.sp,
+                        ),
                         fontWeight = FontWeight.SemiBold,
-                        maxLines = if (compact) 2 else 1,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    item.endpointSummary?.takeUnless { compact }?.let { summary ->
-                        Text(
-                            text = summary,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.padding(top = 2.dp),
-                        )
-                    }
                 }
                 OutboundCardMenu(
-                    compact = compact,
                     onInteractionCountChange = onInteractionCountChange,
                     pingEnabled = item.pingHost != null && !pinging,
                     shareUrlResult = shareUrlResult,
@@ -1160,22 +1143,18 @@ private fun OutboundCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(if (compact) 24.dp else 28.dp)
+                    .height(24.dp)
                     .padding(end = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 AsteriskInfoChip(
-                    text = outbound.type.displaySingBoxProtocolName(compact = compact),
+                    text = outbound.type.displaySingBoxProtocolName(compact = true),
                     modifier = Modifier.weight(1f, fill = false),
-                    textStyle = if (compact) {
-                        MaterialTheme.typography.labelSmall.copy(
-                            fontSize = 10.sp,
-                            lineHeight = 14.sp,
-                        )
-                    } else {
-                        MaterialTheme.typography.labelSmall
-                    },
+                    textStyle = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 10.sp,
+                        lineHeight = 14.sp,
+                    ),
                 )
                 OutboundPingStatus(item.pingLatencyMillis(pingState), pinging)
             }
@@ -1185,7 +1164,6 @@ private fun OutboundCard(
 
 @Composable
 private fun OutboundCardMenu(
-    compact: Boolean,
     pingEnabled: Boolean,
     shareUrlResult: OutboundShareUrlResult,
     onEdit: () -> Unit,
@@ -1204,21 +1182,18 @@ private fun OutboundCardMenu(
     val menuSpatialMotion = AsteriskMotion.fastSpatial<IntOffset>()
     val menuSizeMotion = AsteriskMotion.fastSpatial<IntSize>()
     val menuEffectsMotion = AsteriskMotion.fastEffects<Float>()
-    val menuOffset = if (compact) OutboundCompactCardMenuIconOffset else OutboundCardMenuIconOffset
     Box(
         modifier = Modifier.offset(
-            x = menuOffset.x.dp,
-            y = menuOffset.y.dp,
+            x = OutboundCardMenuIconOffset.x.dp,
+            y = OutboundCardMenuIconOffset.y.dp,
         ),
     ) {
-        // The compact card has no room for a 48dp touch target; keep the icon aligned to the
-        // card's content edge with a 32dp button instead of overflowing the 76dp card.
-        CompositionLocalProvider(
-            LocalMinimumInteractiveComponentSize provides if (compact) 0.dp else 48.dp,
-        ) {
+        // The 76dp card has no room for a 48dp touch target; keep the icon aligned to the
+        // card's content edge with a 32dp button instead of overflowing the card.
+        CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
             IconButton(
                 onClick = { menuExpanded = true },
-                modifier = if (compact) Modifier.size(32.dp) else Modifier,
+                modifier = Modifier.size(32.dp),
             ) {
                 Icon(
                     imageVector = Icons.Rounded.MoreVert,
@@ -1647,17 +1622,9 @@ private val OutboundOptionsMenuWidth = 224.dp
 private val OutboundCardMenuWidth = 224.dp
 private val OutboundGridSpacing = OutboundGridSpacingDp.dp
 private val OutboundCardHeight = OutboundCardHeightDp.dp
-
-// Compact (multi-column) cards mirror the running proxy node card: two-line title,
-// a 24dp protocol/delay line and a 32dp menu button inside the same 76dp height.
-private val OutboundCompactCardHeight = 76.dp
 private val OutboundCardPadding =
     PaddingValues(start = 10.dp, top = 10.dp, end = 10.dp, bottom = 8.dp)
 private val OutboundCardMenuIconOffset = outboundCardMenuIconOffsetDp(
-    touchTargetDp = 48,
-    iconSizeDp = 24,
-)
-private val OutboundCompactCardMenuIconOffset = outboundCardMenuIconOffsetDp(
     touchTargetDp = 32,
     iconSizeDp = 24,
 )

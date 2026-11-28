@@ -17,7 +17,7 @@ import kotlinx.serialization.json.contentOrNull
 
 internal const val OutboundListBaseBottomExtraDp = 12
 internal const val OutboundGridSpacingDp = 8
-internal const val OutboundCardHeightDp = 96
+internal const val OutboundCardHeightDp = 76
 
 internal data class OutboundCardMenuIconOffsetDp(
     val x: Int,
