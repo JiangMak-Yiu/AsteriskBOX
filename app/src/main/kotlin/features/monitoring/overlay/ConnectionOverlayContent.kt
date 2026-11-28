@@ -14,7 +14,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -35,9 +34,11 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -47,11 +48,11 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.AbsoluteAlignment
@@ -74,7 +75,6 @@ import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.platform.ViewConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
@@ -89,6 +89,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.AppState
 import app.R
 import app.modes.NetworkActivityStyleDotted
@@ -99,17 +101,19 @@ import features.monitoring.ConnectionOverlayStats
 import features.monitoring.ConnectionOverlayTrafficSampleLimit
 import features.monitoring.MonitoringIntent
 import features.monitoring.MonitoringRepository
-import features.monitoring.formatMonitoringRate
-import features.monitoring.formatMonitoringRatePair
 import features.monitoring.connections.ConnectionAppResolver
 import features.monitoring.dns.DnsRecord
 import features.monitoring.dns.dnsRcodeLabel
 import features.monitoring.dns.dnsStatusLabel
+import features.monitoring.formatMonitoringRate
+import features.monitoring.formatMonitoringRatePair
+import features.monitoring.observeWhileStarted
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import ui.charts.buildNetworkActivityLineBands
 import ui.charts.buildNetworkActivityWaveform
 import ui.charts.drawDottedWaveform
@@ -118,12 +122,13 @@ import ui.charts.rememberDottedWaveformRamp
 import ui.components.AsteriskExpansionIndicator
 import ui.components.AsteriskSegmentItem
 import ui.components.AsteriskSegmentedControl
-import ui.icons.AsteriskIcons as Icons
+import ui.feedback.AndroidToastTipNotifier
 import ui.theme.AsteriskMotion
 import ui.theme.AsteriskShapeTokens
 import ui.theme.LocalReduceMotion
 import ui.theme.LocalSpacing
 import utils.toReadableBytes
+import ui.icons.AsteriskIcons as Icons
 
 private enum class OverlayDimension(val label: Int) {
     Connections(R.string.home_monitor_connections),
@@ -150,6 +155,11 @@ internal fun ConnectionOverlayContent(
 ) {
     var dimension by remember { mutableStateOf(OverlayDimension.Connections) }
     var selectedRankId by remember { mutableStateOf<String?>(null) }
+    var closingConnection by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val tipNotifier = remember(context) { AndroidToastTipNotifier(context) }
+    val closeFailed = stringResource(R.string.monitor_connections_close_failed)
     val colors = MaterialTheme.colorScheme
     var laidOut by remember { mutableStateOf(false) }
     val spatial = AsteriskMotion.spatial<Float>()
@@ -159,13 +169,28 @@ internal fun ConnectionOverlayContent(
         if (minimized && panelVisible) onMinimizeFinished()
     }
     val panelInteractive = panelVisible && !minimized && expansion.targetValue == 1f && !expansion.isRunning
+    fun closeConnection(id: String) {
+        if (closingConnection || dimension != OverlayDimension.Connections || selectedRankId != id) return
+        closingConnection = true
+        scope.launch {
+            try {
+                monitoring.closeConnection(id)
+                    .onSuccess {
+                        if (dimension == OverlayDimension.Connections && selectedRankId == id) selectedRankId = null
+                    }
+                    .onFailure { tipNotifier.showError(it, closeFailed) }
+            } finally {
+                closingConnection = false
+            }
+        }
+    }
     val (running, chartStyle) = if (panelVisible) {
         remember(appState) {
             appState.map { it.proxyRunning to it.networkActivityStyle }.distinctUntilChanged()
-        }.collectAsState(initial = true to NetworkActivityStyleDotted).value
+        }.collectAsStateWithLifecycle(initialValue = true to NetworkActivityStyleDotted).value
     } else false to NetworkActivityStyleDotted
     val stats = if (panelVisible) {
-        remember(monitoring) { monitoring.connectionOverlayStats() }.collectAsState(ConnectionOverlayStats()).value
+        remember(monitoring) { monitoring.connectionOverlayStats() }.collectAsStateWithLifecycle(ConnectionOverlayStats()).value
     } else ConnectionOverlayStats()
 
     Surface(
@@ -205,7 +230,7 @@ internal fun ConnectionOverlayContent(
                     )
                 }
                 if (panelVisible && hasCustomSize) {
-                    val dnsAvailable by monitoring.dnsAvailable.collectAsState(initial = null)
+                    val dnsAvailable by monitoring.dnsAvailable.collectAsStateWithLifecycle(initialValue = null)
                     val dimensions = remember(dnsAvailable) {
                         OverlayDimension.entries.filter { it != OverlayDimension.Dns || dnsAvailable == true }
                     }
@@ -235,6 +260,7 @@ internal fun ConnectionOverlayContent(
                                         dimension = next
                                     },
                                     selectedRankId = selectedRankId.takeIf { dimension == activeDimension },
+                                    onCloseConnection = if (panelInteractive && !closingConnection) ::closeConnection else null,
                                     onConnectionsVisibilityChanged = onConnectionsVisibilityChanged,
                                     onSelectRank = { id ->
                                         selectedRankId = id.takeUnless { dimension == activeDimension && it == selectedRankId }
@@ -327,13 +353,15 @@ private fun OverlayRankings(
     dimension: OverlayDimension,
     onDimensionChange: (OverlayDimension) -> Unit,
     selectedRankId: String?,
+    onCloseConnection: ((String) -> Unit)?,
     onConnectionsVisibilityChanged: (Boolean) -> Unit,
     onSelectRank: (String) -> Unit,
 ) {
     val onVisibilityChanged by rememberUpdatedState(onConnectionsVisibilityChanged)
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
     if (active && dimension == OverlayDimension.Connections) {
-        DisposableEffect(monitoring) {
-            val observation = monitoring.observe(MonitoringIntent.Connections)
+        DisposableEffect(monitoring, lifecycle) {
+            val observation = monitoring.observeWhileStarted(MonitoringIntent.Connections, lifecycle)
             onVisibilityChanged(true)
             onDispose {
                 observation.close()
@@ -367,7 +395,9 @@ private fun OverlayRankings(
             val selection = selectedRankId.takeIf { content == dimension }
             val onSelect: (String) -> Unit = { id -> if (content == dimension) onSelectRank(id) }
             when (content) {
-                OverlayDimension.Connections -> OverlayConnectionRanking(monitoring, selection, onSelect)
+                OverlayDimension.Connections -> OverlayConnectionRanking(
+                    monitoring, selection, onSelect, onCloseConnection.takeIf { active && content == dimension },
+                )
                 OverlayDimension.Dns -> OverlayDnsRanking(monitoring, selection, onSelect)
             }
         }
@@ -660,6 +690,7 @@ private fun OverlayConnectionRanking(
     monitoring: MonitoringRepository,
     selectedId: String?,
     onSelect: (String) -> Unit,
+    onCloseConnection: ((String) -> Unit)?,
 ) {
     val context = LocalContext.current
     val ranking by remember(monitoring, selectedId, context) {
@@ -671,7 +702,7 @@ private fun OverlayConnectionRanking(
             }
             Triple(summary.status, rankOverlayConnections(connections), pinned)
         }.flowOn(Dispatchers.Default)
-    }.collectAsState(Triple(ConnectionMonitorStatus.Loading, emptyList(), null))
+    }.collectAsStateWithLifecycle(Triple(ConnectionMonitorStatus.Loading, emptyList(), null))
     val (status, rows, resolvedPinned) = ranking
     val pinned = resolvedPinned?.takeIf { it.row.id == selectedId }
     val pinnedKey = pinned?.row?.id
@@ -687,7 +718,13 @@ private fun OverlayConnectionRanking(
                 pinned = pinned,
                 itemKey = { it.row.id },
                 header = { OverlayPinnedHeader(it, onSelect) },
-                details = { OverlayConnectionDetails(it) },
+                details = { item ->
+                    OverlayConnectionDetails(
+                        connection = item,
+                        onCollapse = { onSelect(item.row.id) },
+                        onClose = onCloseConnection.takeIf { item.row.id == pinnedKey },
+                    )
+                },
             )
         },
     ) { row ->
@@ -750,7 +787,7 @@ private fun OverlayPinnedHeader(connection: OverlayPinnedConnection, onSelect: (
         modifier = Modifier.fillMaxWidth().clickable(
             onClickLabel = stringResource(R.string.monitor_connections_details),
             onClick = { onSelect(row.id) },
-        ).padding(horizontal = spacing.small, vertical = spacing.extraSmall),
+        ).padding(start = spacing.small, top = spacing.extraSmall, end = spacing.small),
         horizontalArrangement = Arrangement.spacedBy(spacing.small),
         verticalAlignment = Alignment.Top,
     ) {
@@ -758,13 +795,6 @@ private fun OverlayPinnedHeader(connection: OverlayPinnedConnection, onSelect: (
             OverlayRankTitle(
                 text = row.destination.ifBlank { stringResource(R.string.common_unknown) },
                 style = styles.titleSmall.copy(fontWeight = FontWeight.SemiBold),
-            )
-            Text(
-                text = connection.packageName ?: stringResource(R.string.monitor_connections_unknown_source),
-                style = styles.labelSmall,
-                color = colors.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
             )
         }
         AsteriskExpansionIndicator(
@@ -776,15 +806,56 @@ private fun OverlayPinnedHeader(connection: OverlayPinnedConnection, onSelect: (
 }
 
 @Composable
-private fun OverlayConnectionDetails(connection: OverlayPinnedConnection) {
+private fun OverlayConnectionDetails(
+    connection: OverlayPinnedConnection,
+    onCollapse: () -> Unit,
+    onClose: ((String) -> Unit)?,
+) {
+    val spacing = LocalSpacing.current
+    val colors = MaterialTheme.colorScheme
+    val closeButtonSize = 48.dp
     OverlayDetailContent {
-        if (connection.sourceAddress.isNotBlank()) {
-            OverlayDetailValue(R.string.monitor_connections_source, connection.sourceAddress)
+        Box {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(end = closeButtonSize),
+                verticalArrangement = Arrangement.spacedBy(spacing.extraSmall),
+            ) {
+                Text(
+                    text = connection.packageName ?: stringResource(R.string.monitor_connections_unknown_source),
+                    modifier = Modifier.fillMaxWidth().clickable(
+                        onClickLabel = stringResource(R.string.monitor_connections_details),
+                        onClick = onCollapse,
+                    ),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = colors.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                if (connection.sourceAddress.isNotBlank()) {
+                    OverlayDetailValue(R.string.monitor_connections_source, connection.sourceAddress)
+                }
+                OverlayDetailValue(
+                    R.string.monitor_connections_rate,
+                    formatMonitoringRatePair(connection.uploadRate, connection.downloadRate),
+                )
+            }
+            Box(
+                modifier = Modifier.matchParentSize(),
+                contentAlignment = Alignment.CenterEnd,
+            ) {
+                IconButton(
+                    onClick = { onClose?.invoke(connection.row.id) },
+                    modifier = Modifier.size(closeButtonSize),
+                    enabled = onClose != null,
+                    colors = IconButtonDefaults.iconButtonColors(contentColor = colors.error),
+                ) {
+                    // Align the visible icon edge with the chevron above.
+                    Box(Modifier.fillMaxSize().padding(end = 2.5.dp), contentAlignment = Alignment.CenterEnd) {
+                        Icon(Icons.Rounded.LinkOff, stringResource(R.string.monitor_connections_close_one))
+                    }
+                }
+            }
         }
-        OverlayDetailValue(
-            R.string.monitor_connections_rate,
-            formatMonitoringRatePair(connection.uploadRate, connection.downloadRate),
-        )
     }
 }
 
@@ -838,7 +909,7 @@ private fun OverlayDnsRanking(
         monitoring.dns.map { summary ->
             Triple(summary.status, summary.unsupported, rankOverlayDns(summary.records, selectedDomain))
         }.flowOn(Dispatchers.Default)
-    }.collectAsState(Triple(ConnectionMonitorStatus.Loading, false, emptyList<OverlayDnsRank>() to null))
+    }.collectAsStateWithLifecycle(Triple(ConnectionMonitorStatus.Loading, false, emptyList<OverlayDnsRank>() to null))
     val (status, unsupported, ranked) = ranking
     val (rows, pinned) = ranked
     OverlayExpandableRankList(

@@ -15,7 +15,7 @@
         },
         {
             "uniqueId": "com.github.asterisk4magisk:libbox",
-            "artifactVersion": "v1.15.0-alpha.13-reF1nd-android.6",
+            "artifactVersion": "v1.15.0-alpha.14-reF1nd",
             "name": "AndroidLibBoxLite",
             "description": "Pinned Android JNI and command API bindings for sing-box.",
             "website": "https://github.com/Asterisk4Magisk/AndroidLibBoxLite",
@@ -54,7 +54,7 @@
         },
         {
             "uniqueId": "github:Asterisk4Magisk/AsteriskEnhance",
-            "artifactVersion": "v1.0.9",
+            "artifactVersion": "v1.0.10",
             "name": "Asterisk Enhance",
             "description": "System DNS enhancement for Asterisk apps, powered by Zygisk Next.",
             "website": "https://github.com/Asterisk4Magisk/AsteriskEnhance",
@@ -67,7 +67,7 @@
         },
         {
             "uniqueId": "github:Asterisk4Magisk/asteriskd",
-            "artifactVersion": "v2.3.2",
+            "artifactVersion": "v2.3.3",
             "name": "asteriskd",
             "description": "A root Android daemon that synchronizes local-address bypass rules and pinned eBPF maps.",
             "website": "https://github.com/Asterisk4Magisk/asteriskd",
@@ -301,7 +301,7 @@
         },
         {
             "uniqueId": "io.ktor:ktor-http",
-            "artifactVersion": "3.6.1",
+            "artifactVersion": "3.6.2",
             "name": "ktor-http",
             "description": "Ktor is a framework for quickly creating web applications in Kotlin with minimal effort.",
             "website": "https://github.com/ktorio/ktor",
@@ -366,7 +366,7 @@
         },
         {
             "uniqueId": "io.github.dokar3:quickjs-kt-android",
-            "artifactVersion": "1.0.18",
+            "artifactVersion": "1.0.19",
             "name": "quickjs-kt",
             "description": "A QuickJS binding for idiomatic Kotlin, with Async/DSL/ES Modules support.",
             "website": "https://github.com/dokar3/quickjs-kt",
