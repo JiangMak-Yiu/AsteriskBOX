@@ -123,6 +123,7 @@ import ui.components.AsteriskExpressiveCard
 import ui.components.AsteriskFilterChip
 import ui.components.AsteriskInfoChip
 import ui.components.AsteriskModalBottomSheet
+import ui.components.AsteriskPullToRefreshBox
 import ui.components.AsteriskScaffold
 import ui.components.AsteriskSearchTopAppBar
 import ui.components.AsteriskSelectionCard
@@ -486,7 +487,15 @@ fun SingBoxProxyPage(
                     modifier = Modifier.padding(contentPadding),
                 )
             } else {
-                Box {
+                // Pull to refresh re-runs the group latency test: the group currently in view
+                // (selected group when sections are expandable, the visible pager page otherwise).
+                val refreshGroup = selectedGroup ?: visibleProxies.groups.firstOrNull()
+                AsteriskPullToRefreshBox(
+                    isRefreshing = testingTarget != null,
+                    onRefresh = { refreshGroup?.let { group -> testGroup(group) } },
+                    indicatorTopPadding = listPadding.calculateTopPadding(),
+                    modifier = Modifier.fillMaxSize(),
+                ) {
                     if (expandable) {
                         val sections = remember(
                             sortSnapshot,
