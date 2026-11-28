@@ -63,6 +63,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -107,8 +108,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.DefaultOutboundSubscriptionUserAgent
 import app.AppState
+import app.modes.OutboundListLayoutUltraCompact
 import app.selectableGroupDetourOutbounds
 import app.LocalAppServices
 import app.LocalAppStateStore
@@ -1003,6 +1006,7 @@ internal fun OutboundGroupListPage(
                             ) { isDragging ->
                                 OutboundGroupCard(
                                     group = group,
+                                    ultraCompact = appState.outboundListLayout == OutboundListLayoutUltraCompact,
                                     outboundCount = outboundCountsByGroup[group.id] ?: 0,
                                     syncing = group.id in syncingGroupIds,
                                     isDragging = isDragging,
@@ -1620,6 +1624,7 @@ internal fun OutboundGroupCard(
     selected: Boolean = false,
     editEnabled: Boolean = true,
     deleteEnabled: Boolean = true,
+    ultraCompact: Boolean = false,
 ) {
     val containerColor by animateColorAsState(
         targetValue = when {
@@ -1647,9 +1652,13 @@ internal fun OutboundGroupCard(
         enabled = !enabledChangeBusy && editEnabled,
         modifier = modifier
             .fillMaxWidth()
-            .draggedCardLift(lift, cornerRadius = AsteriskShapeTokens.ListCardRadius)
+            .draggedCardLift(
+                lift,
+                cornerRadius = if (ultraCompact) AsteriskShapeTokens.ExtraSmallContainerRadius
+                else AsteriskShapeTokens.ListCardRadius,
+            )
             .animateContentSize(animationSpec = AsteriskMotion.contentSize()),
-        shape = AsteriskShapeTokens.ListCard,
+        shape = if (ultraCompact) AsteriskShapeTokens.ExtraSmallContainer else AsteriskShapeTokens.ListCard,
         colors = CardDefaults.cardColors(
             containerColor = containerColor,
             disabledContainerColor = if (selected) containerColor else Color.Unspecified,
@@ -1657,7 +1666,14 @@ internal fun OutboundGroupCard(
         ),
     ) {
         val status = group.subscriptionStatusPresentation()
-        Column(Modifier.fillMaxWidth().padding(start = 16.dp, top = 14.dp, end = 8.dp, bottom = 16.dp)) {
+        Column(
+            Modifier.fillMaxWidth().padding(
+                start = if (ultraCompact) 12.dp else 16.dp,
+                top = if (ultraCompact) 8.dp else 14.dp,
+                end = 8.dp,
+                bottom = if (ultraCompact) 8.dp else 16.dp,
+            )
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -1665,7 +1681,11 @@ internal fun OutboundGroupCard(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = group.name,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = if (ultraCompact) {
+                            MaterialTheme.typography.titleSmall.copy(fontSize = 12.sp, lineHeight = 15.sp)
+                        } else {
+                            MaterialTheme.typography.titleMedium
+                        },
                         fontWeight = FontWeight.SemiBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -1772,17 +1792,22 @@ internal fun OutboundGroupCard(
                         )
                     }
                 }
-                Switch(
-                    checked = group.enabled,
-                    onCheckedChange = { showUpdateInfo = false; onEnabledChange(it) },
-                    enabled = !enabledChangeBusy,
-                )
-                Box {
-                    IconButton(
-                        onClick = { showUpdateInfo = false; menuExpanded = true },
+                CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
+                    Switch(
+                        checked = group.enabled,
+                        onCheckedChange = { showUpdateInfo = false; onEnabledChange(it) },
                         enabled = !enabledChangeBusy,
-                    ) {
-                        Icon(Icons.Rounded.MoreVert, stringResource(R.string.common_more))
+                    )
+                }
+                Box {
+                    CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
+                        IconButton(
+                            onClick = { showUpdateInfo = false; menuExpanded = true },
+                            enabled = !enabledChangeBusy,
+                            modifier = if (ultraCompact) Modifier.size(32.dp) else Modifier,
+                        ) {
+                            Icon(Icons.Rounded.MoreVert, stringResource(R.string.common_more))
+                        }
                     }
                     DropdownMenu(
                         expanded = menuExpanded,
